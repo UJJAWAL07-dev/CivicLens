@@ -1,8 +1,8 @@
-\# CivicLens AI
+\# CivicLens AI 
 
 
 
-\## Owner
+\## Shivam
 
 Member 3 — AI / Computer Vision
 
