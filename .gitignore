@@ -1,0 +1,116 @@
+# ==========================================
+# CivicLens - Global Git Ignore
+# ==========================================
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Node / Next.js
+# ==========================================
+
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+.npm/
+*.tsbuildinfo
+
+# ==========================================
+# Python
+# ==========================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+.venv/
+venv/
+env/
+ENV/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+*.egg-info/
+.eggs/
+*.egg
+
+# ==========================================
+# Jupyter
+# ==========================================
+
+.ipynb_checkpoints/
+
+# ==========================================
+# AI / ML
+# ==========================================
+
+# Model weights
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.h5
+*.ckpt
+
+# Experiment outputs
+ai/experiments/*/outputs/
+ai/experiments/*/runs/
+
+# ==========================================
+# Large datasets
+# ==========================================
+
+*.csv
+*.parquet
+*.feather
+*.pkl
+*.pickle
+
+# Keep dataset directories
+!ai/datasets/.gitkeep
+!gis/data/.gitkeep
+!data/datasets/.gitkeep
+
+# ==========================================
+# Logs
+# ==========================================
+
+*.log
+logs/
+
+# ==========================================
+# IDE / Editors
+# ==========================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# OS
+# ==========================================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# Testing
+# ==========================================
+
+playwright-report/
+test-results/
+
+# ==========================================
+# Docker
+# ==========================================
+
+docker-data/
