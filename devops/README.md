@@ -1,44 +1,86 @@
-\# CivicLens DevOps
+```
 
+Never commit `.env` or real credentials.
 
+### Start PostgreSQL + PostGIS
 
-\## Owner
+From the CivicLens repository root:
 
-Member 6 — DevOps / Security / QA
+```bash
+docker compose --env-file .env -f devops/docker/docker-compose.yml up -d
+```
 
+### Stop PostgreSQL + PostGIS
 
+```bash
+docker compose --env-file .env -f devops/docker/docker-compose.yml down
+```
 
-\## Stack
+### Check Database Status
 
-\- Docker
+```bash
+docker ps
+```
 
-\- GitHub Actions
+Check database health:
 
-\- Cloud infrastructure
+```bash
+docker inspect --format='{{.State.Health.Status}}' civiclens-postgres
+```
 
-\- CI/CD
+Expected:
 
+```text
+healthy
+```
 
+### Verify PostGIS
 
-\## Responsibilities
+```bash
+docker exec -it civiclens-postgres psql -U civiclens -d civiclens -c "SELECT PostGIS_Version();"
+```
 
-\- Containers
+### Local Database Connection
 
-\- Deployment
+| Setting | Value |
+|---|---|
+| Host | localhost |
+| Port | 5432 |
+| Database | civiclens |
+| User | civiclens |
+| Password | Set through `.env` |
 
-\- CI/CD
+### Persistent Storage
 
-\- Monitoring
+PostgreSQL data is stored in the Docker volume:
 
-\- Logging
+```text
+civiclens_postgres_data
+```
 
-\- Security
+The volume keeps database data persistent when the PostgreSQL container is stopped or recreated.
 
-\- Automated testing infrastructure
+### Docker Configuration
 
+Compose file:
 
+```text
+devops/docker/docker-compose.yml
+```
 
-\## Directory
+The database configuration includes:
 
-/devops
+- PostgreSQL 16
+- PostGIS 3.4
+- Persistent Docker volume
+- Environment-based configuration
+- PostgreSQL health check
+- Port 5432
 
+## Security
+
+- Never commit `.env`.
+- Never commit real passwords or API keys.
+- Never place secrets inside Dockerfiles.
+- Use environment variables for local configuration.
+- Production secrets must use an approved secret-management mechanism.

@@ -1,0 +1,30 @@
+name: CivicLens CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate DevOps structure
+        run: |
+          test -d devops
+          test -d devops/docker
+          test -f devops/docker/docker-compose.yml
+          test -f devops/README.md
+          test -f .env.example
+
+      - name: Validate Docker Compose
+        run: |
+          docker compose --env-file .env.example \
+            -f devops/docker/docker-compose.yml config
