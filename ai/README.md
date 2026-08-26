@@ -1,54 +1,45 @@
-AI module
-├── How to set up the environment
-├── How to run tests
-├── How to run YOLO inference
-├── Input/output format
-├── Confidence threshold
-├── Dataset structure
-└── Current limitation:
-    yolo26n.pt is a general pretrained model and
-    is not yet trained for CivicLens pothole detection.
-
-\#=============================================================================================================================
-\# CivicLens AI 
-
-
-
-\## Shivam
+# CivicLens AI
 
 Member 3 — AI / Computer Vision
 
+## Overview
 
+The CivicLens AI module provides image preprocessing, YOLO-based object detection,
+confidence filtering, structured detection results, and optional annotated images.
 
-\## Stack
+The main inference interface is:
 
-\- Python
+```python
+from src.inference.detector import run_inference
 
-\- FastAPI
-
-\- PyTorch
-
-\- YOLO
-
-
-
-\## Responsibilities
-
-\- Image preprocessing
-
-\- Civic issue detection
-
-\- Classification
-
-\- Severity estimation
-
-\- Duplicate detection
-
-\- Predictive intelligence
+result = run_inference("path/to/image.jpg")
 
 
 
-\## Directory
 
-/ai
-
+Directory Structure:
+ai/
+├── src/
+│   ├── inference/
+│   │   └── detector.py
+│   ├── preprocessing/
+│   │   └── image.py
+│   └── utils/
+│       ├── classes.py
+│       └── errors.py
+│
+├── models/
+│   └── yolo26n.pt
+│
+├── datasets/
+│   └── test/
+│       ├── issue/
+│       └── no_issue/
+│
+├── tests/
+│
+├── notebooks/
+│
+├── outputs/
+│
+└── README.md
