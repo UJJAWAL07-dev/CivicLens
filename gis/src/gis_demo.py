@@ -1,5 +1,4 @@
 import argparse
-import json
 from pathlib import Path
 
 import geopandas as gpd
@@ -39,24 +38,28 @@ def create_issue_points(latitude, longitude):
         {
             "issueId": "CL-001",
             "issueType": "Pothole",
+            "severity": "High",
             "latitude": 22.5726,
             "longitude": 88.3639,
         },
         {
             "issueId": "CL-002",
             "issueType": "Garbage",
+            "severity": "Medium",
             "latitude": 22.5750,
             "longitude": 88.3680,
         },
         {
             "issueId": "CL-003",
             "issueType": "Streetlight",
+            "severity": "Low",
             "latitude": 22.5690,
             "longitude": 88.3600,
         },
         {
             "issueId": "USER-001",
             "issueType": "User Report",
+            "severity": "High",
             "latitude": latitude,
             "longitude": longitude,
         },
@@ -89,16 +92,37 @@ def export_geojson(gdf, output_path):
 
 
 def plot_issues(gdf, output_path):
-    """Plot civic issue points and save the map as PNG."""
+    """Plot multiple civic issue points with labels."""
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    ax = gdf.plot(
-        figsize=(8, 6),
-        markersize=80,
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    # Plot all civic issue points
+    gdf.plot(
+        ax=ax,
+        markersize=120,
         edgecolor="black",
     )
+
+    # Add issue information beside every marker
+    for _, issue in gdf.iterrows():
+        x = issue.geometry.x
+        y = issue.geometry.y
+
+        label = (
+            f"{issue['issueType']}\n"
+            f"Severity: {issue['severity']}"
+        )
+
+        ax.annotate(
+            label,
+            xy=(x, y),
+            xytext=(8, 8),
+            textcoords="offset points",
+            fontsize=9,
+        )
 
     ax.set_title("CivicLens Civic Issues")
     ax.set_xlabel("Longitude")
