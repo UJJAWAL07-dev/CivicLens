@@ -28,13 +28,19 @@ def _random_date(start_year=2024, end_year=2025):
     return (start + timedelta(days=random_days)).strftime("%Y-%m-%d")
 
 
+def _resolution_date(reported_date):
+    reported = datetime.strptime(reported_date, "%Y-%m-%d")
+    return (reported + timedelta(days=random.randint(1, 45))).strftime("%Y-%m-%d")
+
+
 def _random_coords():
     latitude = round(random.uniform(10.0, 30.0), 6)
     longitude = round(random.uniform(70.0, 90.0), 6)
     return latitude, longitude
 
 
-def write_sample_dataset(csv_path, record_count=150):
+def write_sample_dataset(csv_path, record_count=150, seed=42):
+    random.seed(seed)
     path = Path(csv_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -46,7 +52,7 @@ def write_sample_dataset(csv_path, record_count=150):
         severity = random.choice(SEVERITIES)
         status = random.choice(STATUSES)
         reported_date = _random_date()
-        resolution_date = _random_date() if status in {"Resolved", "Closed"} else ""
+        resolution_date = _resolution_date(reported_date) if status in {"Resolved", "Closed"} else ""
 
         rows.append({
             "report_id": report_id,
