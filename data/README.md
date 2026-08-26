@@ -44,6 +44,20 @@ CivicLens follows a layered data model:
 - Analytics layer: aggregated metrics for reporting and prediction
 - Spatial layer: point, polygon, and proximity-based geodata
 
+## Dataset Structure
+Raw input files belong in `data/raw/` and are never modified by the pipeline. Processed outputs are written to `data/processed/`:
+
+```text
+data/
+  raw/sample_reports.csv          # source CSV, unchanged
+  processed/cleaned_reports.csv   # valid records only
+  processed/invalid_records.csv   # flagged records with reasons
+  processed/validation_report.json
+  processed/analytics_report.json
+```
+
+The canonical CSV columns are `report_id`, `issue_type`, `latitude`, `longitude`, `severity`, `status`, `reported_date`, and `resolution_date`.
+
 ## Expected Data Domains
 - Reports and complaint records
 - Issue severity and category classification
@@ -59,6 +73,22 @@ CivicLens follows a layered data model:
 - Geocode verification and location confidence checks
 - Null handling and missing-value tracking
 - Time-series continuity checks for historical datasets
+
+## Cleaning and Validation Rules
+- Required columns must all be present before rows are read.
+- Text values are trimmed and normalized to lowercase.
+- Issue categories use the documented canonical names; unknown categories are invalid.
+- Severity values are `low`, `medium`, `high`, or `critical`.
+- Status values are `open`, `pending`, `in_progress`, `resolved`, `closed`, or `reopened`.
+- Dates accept common input formats and are written as `YYYY-MM-DD`.
+- `reported_date` is required; `resolution_date` may be empty for unresolved reports.
+- Latitude must be between -90 and 90; longitude must be between -180 and 180.
+- Numeric coordinates are written as decimal numbers in processed data.
+- Exact duplicate rows are flagged and excluded from cleaned output.
+- Missing or invalid values are written to `invalid_records.csv` with row number and reason.
+- A resolution date before the reported date is invalid.
+
+Invalid rows are reported rather than silently discarded. The raw source remains unchanged.
 
 ## Recommended Directory Structure
 ```text
@@ -94,6 +124,60 @@ CivicLens follows a layered data model:
 5. Deduplicate repeated reports and anomalies
 6. Load into curated and analytics datasets
 7. Expose curated tables to AI, GIS, and backend services
+
+## Pipeline Execution
+Run the complete flow with one command from the repository root:
+
+```bash
+python -m data.run_pipeline
+```
+
+This generates the reproducible sample input at `data/raw/sample_reports.csv` when no input is supplied. To process an existing raw CSV without changing it:
+
+```bash
+python -m data.run_pipeline --raw-csv data/raw/reports.csv --output-dir data/processed
+```
+
+The command creates cleaned records, flagged invalid records, a validation report, and an analytics report.
+
+## Analytics Output
+`analytics_report.json` contains total reports, counts by issue type, severity, and status, resolved versus unresolved counts, and average resolution time in days. The analytics are calculated from cleaned records only.
+
+## Backend Integration Schema
+The backend can consume `processed/cleaned_reports.csv` or the equivalent records from a database. Each processed record has this schema:
+
+| Field | Type | Allowed values / format |
+| --- | --- | --- |
+| `report_id` | string | non-empty unique source identifier |
+| `issue_type` | string | `pothole`, `streetlight`, `water_leakage`, `garbage`, `drainage`, `road_damage`, `traffic_signal`, `manhole` |
+| `latitude` | float | -90 to 90, decimal degrees |
+| `longitude` | float | -180 to 180, decimal degrees |
+| `severity` | string | `low`, `medium`, `high`, `critical` |
+| `status` | string | `open`, `pending`, `in_progress`, `resolved`, `closed`, `reopened` |
+| `reported_date` | string | ISO date: `YYYY-MM-DD` |
+| `resolution_date` | string or null | ISO date, null when unresolved |
+
+Example processed record:
+
+```json
+{
+  "report_id": "CIV-0042",
+  "issue_type": "pothole",
+  "latitude": 12.345678,
+  "longitude": 76.54321,
+  "severity": "high",
+  "status": "resolved",
+  "reported_date": "2025-01-05",
+  "resolution_date": "2025-01-15"
+}
+```
+
+## Testing
+Run the data tests with:
+
+```bash
+python -m pytest -q tests/test_data_pipeline.py
+```
 
 ## Governance and Privacy
 - Protect personally identifiable information where applicable

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
@@ -61,6 +62,16 @@ STATUS_MAP = {
 
 VALID_SEVERITIES = {"low", "medium", "high", "critical"}
 VALID_STATUSES = {"open", "pending", "in_progress", "resolved", "closed", "reopened"}
+PROCESSED_COLUMNS = [
+    "report_id",
+    "issue_type",
+    "latitude",
+    "longitude",
+    "severity",
+    "status",
+    "reported_date",
+    "resolution_date",
+]
 
 
 def _normalize_text(value):
@@ -162,8 +173,19 @@ def clean_civic_records(records):
         resolution_date = _isoformat_date(record.get("resolution_date"))
         if record.get("resolution_date") and resolution_date is None:
             reason_parts.append("resolution_date invalid")
+        if reported_date and resolution_date and resolution_date < reported_date:
+            reason_parts.append("resolution_date before reported_date")
 
-        record_key = (report_id, normalized_issue, latitude, longitude, severity, status, reported_date)
+        record_key = (
+            report_id,
+            normalized_issue,
+            latitude,
+            longitude,
+            severity,
+            status,
+            reported_date,
+            resolution_date,
+        )
         if report_id and record_key in seen:
             reason_parts.append("duplicate record")
         else:
@@ -194,11 +216,14 @@ def clean_civic_records(records):
 
 def validate_records(records):
     cleaned, invalid = clean_civic_records(records)
+    reason_counts = Counter()
+    for item in invalid:
+        reason_counts.update(item["reason"].split("; "))
     validation_report = {
         "total_rows": len(records),
         "clean_rows": len(cleaned),
         "invalid_rows": len(invalid),
-        "invalid_reasons": dict(Counter(item["reason"] for item in invalid)),
+        "invalid_reasons": dict(reason_counts),
     }
     return cleaned, invalid, validation_report
 
@@ -210,16 +235,7 @@ def save_processed_dataset(output_dir, cleaned, invalid):
     with (path / "cleaned_reports.csv").open("w", newline="") as f:
         writer = csv.DictWriter(
             f,
-            fieldnames=[
-                "report_id",
-                "issue_type",
-                "latitude",
-                "longitude",
-                "severity",
-                "status",
-                "reported_date",
-                "resolution_date",
-            ],
+            fieldnames=PROCESSED_COLUMNS,
         )
         writer.writeheader()
         writer.writerows(cleaned)
@@ -236,6 +252,14 @@ def save_processed_dataset(output_dir, cleaned, invalid):
             })
 
     return path
+
+
+def save_json(path, payload):
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+    return output_path
 
 
 def _calculate_resolution_days(report):
@@ -273,6 +297,20 @@ def analyse_cleaned_records(records):
             "unresolved": unresolved_count,
         },
         "average_resolution_days": average_resolution_days,
+    }
+
+
+def run_pipeline(csv_path, output_dir):
+    rows = ingest_csv(csv_path)
+    cleaned, invalid, validation_report = validate_records(rows)
+    output_path = save_processed_dataset(output_dir, cleaned, invalid)
+    save_json(output_path / "validation_report.json", validation_report)
+    save_json(output_path / "analytics_report.json", analyse_cleaned_records(cleaned))
+    return {
+        "raw_rows": len(rows),
+        "cleaned_rows": len(cleaned),
+        "invalid_rows": len(invalid),
+        "output_dir": str(output_path),
     }
 
 
