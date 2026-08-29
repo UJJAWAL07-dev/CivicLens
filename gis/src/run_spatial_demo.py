@@ -22,7 +22,7 @@ def main():
 
     for _, issue in nearby.iterrows():
         print(
-            f"{issue['issueId']} | "
+            f"{issue['reportId']} | "
             f"{issue['issueType']} | "
             f"{issue['severity']} | "
             f"{issue['distance_meters']:.2f} meters"

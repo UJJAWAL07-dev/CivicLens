@@ -60,11 +60,19 @@ def issues_near_location(
 
     The input GeoDataFrame must use EPSG:4326.
     """
+    if not hasattr(gdf, "geometry"):
+        raise ValueError("GeoDataFrame must contain geometry.")
 
     validate_coordinates(latitude, longitude)
 
     if radius_meters < 0:
         raise ValueError("Radius cannot be negative.")
+
+       # Handle empty datasets
+    if gdf.empty:
+        result = gdf.copy()
+        result["distance_meters"] = []
+        return result
 
     distances = gdf.geometry.apply(
         lambda point: calculate_distance(

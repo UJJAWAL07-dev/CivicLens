@@ -25,7 +25,32 @@ def validate_coordinates(latitude, longitude):
         raise ValueError("Longitude must be between -180 and 180.")
 
     return True
+def create_issue_geodataframe(issues):
+    """
+    Convert civic issue records into a GeoDataFrame.
 
+    Empty input returns an empty GeoDataFrame with the
+    expected columns and CRS.
+    """
+
+    columns = [
+        "reportId",
+        "issueType",
+        "severity",
+        "status",
+        "latitude",
+        "longitude",
+        "geometry",
+    ]
+
+    if not issues:
+        return gpd.GeoDataFrame(
+            columns=columns,
+            geometry="geometry",
+            crs=CRS,
+        )
+
+    return create_issue_geodataframe(issues)
 
 def create_issue_points(latitude, longitude):
     """
@@ -35,35 +60,39 @@ def create_issue_points(latitude, longitude):
     """
 
     issues = [
-        {
-            "issueId": "CL-001",
-            "issueType": "Pothole",
-            "severity": "High",
-            "latitude": 22.5726,
-            "longitude": 88.3639,
-        },
-        {
-            "issueId": "CL-002",
-            "issueType": "Garbage",
-            "severity": "Medium",
-            "latitude": 22.5750,
-            "longitude": 88.3680,
-        },
-        {
-            "issueId": "CL-003",
-            "issueType": "Streetlight",
-            "severity": "Low",
-            "latitude": 22.5690,
-            "longitude": 88.3600,
-        },
-        {
-            "issueId": "USER-001",
-            "issueType": "User Report",
-            "severity": "High",
-            "latitude": latitude,
-            "longitude": longitude,
-        },
-    ]
+    {
+        "reportId": "CL-001",
+        "issueType": "Pothole",
+        "severity": "High",
+        "status": "Open",
+        "latitude": 22.5726,
+        "longitude": 88.3639,
+    },
+    {
+        "reportId": "CL-002",
+        "issueType": "Garbage",
+        "severity": "Medium",
+        "status": "Open",
+        "latitude": 22.5750,
+        "longitude": 88.3680,
+    },
+    {
+        "reportId": "CL-003",
+        "issueType": "Streetlight",
+        "severity": "Low",
+        "status": "In Progress",
+        "latitude": 22.5690,
+        "longitude": 88.3600,
+    },
+    {
+        "reportId": "USER-001",
+        "issueType": "User Report",
+        "severity": "High",
+        "status": "Open",
+        "latitude": latitude,
+        "longitude": longitude,
+    },
+]
 
     geometry = [
         Point(issue["longitude"], issue["latitude"])

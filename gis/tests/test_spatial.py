@@ -61,4 +61,53 @@ def test_issues_near_location():
     )
 
     assert "CL-001" in result["issueId"].values
-    
+def test_empty_dataset():
+    import geopandas as gpd
+
+    gdf = gpd.GeoDataFrame(
+        {
+            "reportId": [],
+            "issueType": [],
+            "severity": [],
+            "status": [],
+        },
+        geometry=[],
+        crs="EPSG:4326",
+    )
+
+    result = issues_near_location(
+        gdf,
+        22.5726,
+        88.3639,
+        500,
+    )
+
+    assert result.empty
+
+
+def test_no_nearby_results():
+    import geopandas as gpd
+    from shapely.geometry import Point
+
+    gdf = gpd.GeoDataFrame(
+        {
+            "reportId": ["CL-001"],
+            "issueType": ["Pothole"],
+            "severity": ["High"],
+            "status": ["Open"],
+        },
+        geometry=[
+            Point(88.3639, 22.5726)
+        ],
+        crs="EPSG:4326",
+    )
+
+    result = issues_near_location(
+        gdf,
+        23.0000,
+        89.0000,
+        100,
+    )
+
+    assert result.empty    
+  
