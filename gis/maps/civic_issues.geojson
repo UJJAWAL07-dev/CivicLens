@@ -3,9 +3,9 @@
 "name": "civic_issues",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "issueId": "CL-001", "issueType": "Pothole", "latitude": 22.5726, "longitude": 88.3639 }, "geometry": { "type": "Point", "coordinates": [ 88.3639, 22.5726 ] } },
-{ "type": "Feature", "properties": { "issueId": "CL-002", "issueType": "Garbage", "latitude": 22.575, "longitude": 88.368 }, "geometry": { "type": "Point", "coordinates": [ 88.368, 22.575 ] } },
-{ "type": "Feature", "properties": { "issueId": "CL-003", "issueType": "Streetlight", "latitude": 22.569, "longitude": 88.36 }, "geometry": { "type": "Point", "coordinates": [ 88.36, 22.569 ] } },
-{ "type": "Feature", "properties": { "issueId": "USER-001", "issueType": "User Report", "latitude": 22.5726, "longitude": 88.3639 }, "geometry": { "type": "Point", "coordinates": [ 88.3639, 22.5726 ] } }
+{ "type": "Feature", "properties": { "reportId": "CL-001", "issueType": "Pothole", "severity": "High", "status": "Open", "latitude": 22.5726, "longitude": 88.3639 }, "geometry": { "type": "Point", "coordinates": [ 88.3639, 22.5726 ] } },
+{ "type": "Feature", "properties": { "reportId": "CL-002", "issueType": "Garbage", "severity": "Medium", "status": "Open", "latitude": 22.575, "longitude": 88.368 }, "geometry": { "type": "Point", "coordinates": [ 88.368, 22.575 ] } },
+{ "type": "Feature", "properties": { "reportId": "CL-003", "issueType": "Streetlight", "severity": "Low", "status": "In Progress", "latitude": 22.569, "longitude": 88.36 }, "geometry": { "type": "Point", "coordinates": [ 88.36, 22.569 ] } },
+{ "type": "Feature", "properties": { "reportId": "USER-001", "issueType": "User Report", "severity": "High", "status": "Open", "latitude": 22.5726, "longitude": 88.3639 }, "geometry": { "type": "Point", "coordinates": [ 88.3639, 22.5726 ] } }
 ]
 }

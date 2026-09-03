@@ -1,5 +1,4 @@
 import argparse
-import json
 from pathlib import Path
 
 import geopandas as gpd
@@ -26,7 +25,32 @@ def validate_coordinates(latitude, longitude):
         raise ValueError("Longitude must be between -180 and 180.")
 
     return True
+def create_issue_geodataframe(issues):
+    """
+    Convert civic issue records into a GeoDataFrame.
 
+    Empty input returns an empty GeoDataFrame with the
+    expected columns and CRS.
+    """
+
+    columns = [
+        "reportId",
+        "issueType",
+        "severity",
+        "status",
+        "latitude",
+        "longitude",
+        "geometry",
+    ]
+
+    if not issues:
+        return gpd.GeoDataFrame(
+            columns=columns,
+            geometry="geometry",
+            crs=CRS,
+        )
+
+    return create_issue_geodataframe(issues)
 
 def create_issue_points(latitude, longitude):
     """
@@ -36,31 +60,39 @@ def create_issue_points(latitude, longitude):
     """
 
     issues = [
-        {
-            "issueId": "CL-001",
-            "issueType": "Pothole",
-            "latitude": 22.5726,
-            "longitude": 88.3639,
-        },
-        {
-            "issueId": "CL-002",
-            "issueType": "Garbage",
-            "latitude": 22.5750,
-            "longitude": 88.3680,
-        },
-        {
-            "issueId": "CL-003",
-            "issueType": "Streetlight",
-            "latitude": 22.5690,
-            "longitude": 88.3600,
-        },
-        {
-            "issueId": "USER-001",
-            "issueType": "User Report",
-            "latitude": latitude,
-            "longitude": longitude,
-        },
-    ]
+    {
+        "reportId": "CL-001",
+        "issueType": "Pothole",
+        "severity": "High",
+        "status": "Open",
+        "latitude": 22.5726,
+        "longitude": 88.3639,
+    },
+    {
+        "reportId": "CL-002",
+        "issueType": "Garbage",
+        "severity": "Medium",
+        "status": "Open",
+        "latitude": 22.5750,
+        "longitude": 88.3680,
+    },
+    {
+        "reportId": "CL-003",
+        "issueType": "Streetlight",
+        "severity": "Low",
+        "status": "In Progress",
+        "latitude": 22.5690,
+        "longitude": 88.3600,
+    },
+    {
+        "reportId": "USER-001",
+        "issueType": "User Report",
+        "severity": "High",
+        "status": "Open",
+        "latitude": latitude,
+        "longitude": longitude,
+    },
+]
 
     geometry = [
         Point(issue["longitude"], issue["latitude"])
@@ -89,16 +121,37 @@ def export_geojson(gdf, output_path):
 
 
 def plot_issues(gdf, output_path):
-    """Plot civic issue points and save the map as PNG."""
+    """Plot multiple civic issue points with labels."""
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    ax = gdf.plot(
-        figsize=(8, 6),
-        markersize=80,
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    # Plot all civic issue points
+    gdf.plot(
+        ax=ax,
+        markersize=120,
         edgecolor="black",
     )
+
+    # Add issue information beside every marker
+    for _, issue in gdf.iterrows():
+        x = issue.geometry.x
+        y = issue.geometry.y
+
+        label = (
+            f"{issue['issueType']}\n"
+            f"Severity: {issue['severity']}"
+        )
+
+        ax.annotate(
+            label,
+            xy=(x, y),
+            xytext=(8, 8),
+            textcoords="offset points",
+            fontsize=9,
+        )
 
     ax.set_title("CivicLens Civic Issues")
     ax.set_xlabel("Longitude")
